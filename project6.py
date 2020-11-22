@@ -142,7 +142,7 @@ def main():
     # print(knn)
     # the first colum should be it's self or its 'identity', so the first neighbor should be the index in the second column
     assumedSpecies = pd.Series().reindex_like(speciesTest)
-
+    assumedSpecies.name = "assumedSpecies"
     #print(assumedSpecies)
    
     for x in range(knn.shape[0]):
@@ -156,8 +156,11 @@ def main():
         assumedSpecies.iloc[x] = speciesTrain.iloc[nn[0]] # I don't know why the line above works but this doens't
         # I figured it out, it was becuase i didn't use .iloc in front of the slice. I figured i didn't need to because it was a Series not a dataframe, i guess i was wrong
 
+        # yay!! we now have an assumed list of species from our test set. Time to test now acruate it is with the actual set!
 
-    print(assumedSpecies)
+
+
+    print(assumedSpecies == speciesTest)
 if __name__=="__main__":
     main()
     #plt.show()
