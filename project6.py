@@ -71,8 +71,15 @@ def main():
 
     (normTrain, meanTrain, stdTrain) = Utils.z_score(train)
    
+
+
+
+
+
+
     # PCA starts hear
-    (pc, eig) = Utils.getPC(normTrain) 
+    (pc, eig) = Utils.getPC(normTrain)
+
     y = normTrain @ pc
     y_proj = y.iloc[:, 0:d]   
 
@@ -81,16 +88,59 @@ def main():
     normalizedPCAdata = (y_proj @ pc.iloc[:,0:d].T)
     normalizedPCAdata.columns = train.columns 
     data_rec = normalizedPCAdata * stdTrain + meanTrain # I do this seperatly so I can add metadata to the normalized PCA data, otherwise it has an issues multipling with the std and mean
-   
+
     preprosTrain = pd.concat([data_rec, speciesTrain], axis=1) # this is our compleate dataset that has gone through PCA and our preprocessing steps
     #print(preprosTrain)
     sns.pairplot(preprosTrain, hue="species")           # pair plot of our preprocess data
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     # START OF KNN ---- START OF KNN ---- START OF KNN
             # and issue i see is passing the test data through the PCA projection that we've made. I'm not sure how to do that
-    preTest = test    # for now I'm just gonna create a var named preTest which will be our projected test set (once i figure out how to do that)
+
+    #start of preprocessing test data
+    normTest = Utils.normalize(test, meanTrain, stdTrain)
+    #pca on test data
+
+    y = normTest @ pc.to_numpy()
+    y_proj = y.iloc[:, 0:d]
+
+    pc = pd.DataFrame(pc)
+ 
+    normalizedPCAdata = (y_proj @ pc.iloc[:,0:d].T)
+    normalizedPCAdata.columns = train.columns 
+    preTest = normalizedPCAdata * stdTrain + meanTrain # I do this seperatly so I can add metadata to the normalized PCA data, otherwise it has an issues multipling with the std and mean
     
+    preprosTestCompleated = pd.concat([preTest, speciesTest], axis=1) # this is our PCA space test set with answers!! 
+
+    sns.pairplot(preprosTestCompleated, hue="species")
+    #somethings going wrong with my PCA.
+
+
+    #print(preTest)
+    #preTest = test    # for now I'm just gonna create a var named preTest which will be our projected test set (once i figure out how to do that)
+    
+    # need to find a way to put the test set through PCA
+
+
+
+
+
+
+
+
+
     k = 3   #how many neighbors to visit
 
     #start with a point x
@@ -163,4 +213,4 @@ def main():
     print(assumedSpecies == speciesTest)
 if __name__=="__main__":
     main()
-    #plt.show()
+    plt.show()
