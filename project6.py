@@ -48,7 +48,7 @@ def main():
     1. Visualize the raw data (e.g. in a pair plot), and form a hypothesis about which classifier will perform better: KNN or Naive Bayes.
         I think that KNN will do better. 
     """
-    sns.pairplot(iris, hue="species")   #original iris pairplot (step 1)
+    #sns.pairplot(iris, hue="species")   #original iris pairplot (step 1)
     """
     2. Preprocess as you see fit. For example: normalization, PCA, training/test sets, …
         CAUTION: The mean, std, and PCs should be calculated for the training set only. The test set should be normalized using the training set’s mean & std, and rotated onto the PCs of the training set. Otherwise the test space != training space, and high jinx ensue.
@@ -121,15 +121,14 @@ def main():
     normalizedPCAdata = (y_proj @ pc.iloc[:,0:d].T)
     normalizedPCAdata.columns = train.columns 
     preTest = normalizedPCAdata * stdTrain + meanTrain # I do this seperatly so I can add metadata to the normalized PCA data, otherwise it has an issues multipling with the std and mean
-    
+
+
     preprosTestCompleated = pd.concat([preTest, speciesTest], axis=1) # this is our PCA space test set with answers!! 
 
     sns.pairplot(preprosTestCompleated, hue="species")
     #somethings going wrong with my PCA.
 
-
-    #print(preTest)
-    #preTest = test    # for now I'm just gonna create a var named preTest which will be our projected test set (once i figure out how to do that)
+    # for now I'm just gonna create a var named preTest which will be our projected test set (once i figure out how to do that)
     
     # need to find a way to put the test set through PCA
 
@@ -186,8 +185,10 @@ def main():
     #dist is now a 29, 120 shape ndarray that contains the distance from x to every other point in training
     # now we sort to find knn
 
-    knnFlipped = np.argsort(dist, axis = 1) # returns the order, from gratest to smallest, in which one can find x's closest neighbor
-    knn = np.flip(knnFlipped, axis = 1) #flips the array so that the first colums hold the number of the closest points
+    knn = np.argsort(dist, axis = 1) # returns the order, from gratest to smallest, in which one can find x's closest neighbor
+    #knn = np.flip(knn, axis = 1) #flips the array so that the first colums hold the number of the closest points # as it turns out it doens't need to be flipped. This cost me hours of debugging to relize that it was ordering things properly 
+    
+    #knn = knnFlipped
     # print(knnFlipped)
     # print(knn)
     # the first colum should be it's self or its 'identity', so the first neighbor should be the index in the second column
@@ -204,13 +205,24 @@ def main():
         #print("x is ", x, ". NN is ", nn[0])
         #print("speciesTrain at nn is ", speciesTrain.iloc[nn[0]]) #this works but the line bellow it will delever nan s sometimes
         assumedSpecies.iloc[x] = speciesTrain.iloc[nn[0]] # I don't know why the line above works but this doens't
+        
+        
+        
+        
         # I figured it out, it was becuase i didn't use .iloc in front of the slice. I figured i didn't need to because it was a Series not a dataframe, i guess i was wrong
 
         # yay!! we now have an assumed list of species from our test set. Time to test now acruate it is with the actual set!
 
 
 
-    print(assumedSpecies == speciesTest)
+
+
+
+    accuracyBool = (assumedSpecies == speciesTest)
+    accuracyRaw = accuracyBool.value_counts()
+    accuracy = accuracyBool.value_counts(normalize=True).mul(100).astype(str)+'%'
+    print(accuracy)
+
 if __name__=="__main__":
     main()
     plt.show()
