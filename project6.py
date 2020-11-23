@@ -42,11 +42,28 @@ def main():
     penguins = sns.load_dataset("penguins")
     penguins.pop("island")
     penguins.pop("sex")
+    penguins.dropna(axis=1) #drop rows with nan values
     
-    #print(penguins)
-    
-    (penguinsTestGuess, penguinsAccuracy) = knn(penguins)
-    (irisTestGuess, irisAccuracy) = knn(iris)
+    print("\npenguins")
+
+    for i in range(1, 10):
+        accuracy = 0 
+        for x in range(20): #we average 20 tests for each k
+            (penguinsTestGuess, penguinsAccuracy) = knn(penguins, k = i)
+            accuracy += penguinsAccuracy.iloc[0] #add the true accuracy value
+        accuracy = accuracy/20 # averages the accracy of each k over 20 tries
+        print("\nk = ", i, "\n accuracy = ", accuracy)
+ 
+    print("\niris")
+
+    for i in range(1, 10):
+        accuracy = 0 
+        for x in range(20): #we average 20 tests for each k
+            (irisTestGuess, irisAccuracy) = knn(iris, k = i)
+            accuracy += irisAccuracy.iloc[0] #add the true accuracy value
+        accuracy = accuracy/20 # averages the accracy of each k over 20 tries
+        print("\nk = ", i, "\n accuracy = ", accuracy)
+ 
 
 
 def knn(data, trainRatio = .80, d = 2, k = 5):
@@ -180,7 +197,7 @@ def knn(data, trainRatio = .80, d = 2, k = 5):
     # print(knnFlipped)
     # print(knn)
     # the first colum should be it's self or its 'identity', so the first neighbor should be the index in the second column
-    assumedSpecies = pd.Series().reindex_like(speciesTest)
+    assumedSpecies = pd.Series(dtype=object).reindex_like(speciesTest)
     assumedSpecies.name = "assumedSpecies"
     #print(assumedSpecies)
    
@@ -211,7 +228,7 @@ def knn(data, trainRatio = .80, d = 2, k = 5):
 
     accuracyBool = (assumedSpecies == speciesTest)
     accuracyRaw = accuracyBool.value_counts()
-    accuracy = accuracyBool.value_counts(normalize=True).mul(100).astype(str)+'%'
+    accuracy = accuracyBool.value_counts(normalize=True) #sets the value equal to the ratio of accruacy acheaved
   
     finalTest = pd.concat([test, assumedSpecies], axis=1) # this is our compleate dataset that has gone through PCA and our preprocessing steps
   
