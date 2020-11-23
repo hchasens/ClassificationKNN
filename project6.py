@@ -35,6 +35,9 @@ To Do
 
 sns.set_theme(style="ticks")
 
+graphing = False         # if set to true it will start plots, this is set to false by default
+
+
 def main():
     iris = sns.load_dataset("iris")
     
@@ -113,7 +116,8 @@ def knn(data, trainRatio = .80, d = 2, k = 5):
 
     preprosTrain = pd.concat([data_rec, speciesTrain], axis=1) # this is our compleate dataset that has gone through PCA and our preprocessing steps
     #print(preprosTrain)
-    sns.pairplot(preprosTrain, hue="species")           # pair plot of our preprocess data
+    if graphing:
+        sns.pairplot(preprosTrain, hue="species")           # pair plot of our preprocess data
 
 
     # START OF KNN ---- START OF KNN ---- START OF KNN
@@ -135,7 +139,8 @@ def knn(data, trainRatio = .80, d = 2, k = 5):
 
     preprosTestCompleated = pd.concat([preTest, speciesTest], axis=1) # this is our PCA space test set with answers!! 
 
-    sns.pairplot(preprosTestCompleated, hue="species")
+    if graphing:
+        sns.pairplot(preprosTestCompleated, hue="species")
     #somethings going wrong with my PCA.
 
     # for now I'm just gonna create a var named preTest which will be our projected test set (once i figure out how to do that)
@@ -236,4 +241,4 @@ def knn(data, trainRatio = .80, d = 2, k = 5):
 
 if __name__=="__main__":
     main()
-    #plt.show()
+    plt.show()
