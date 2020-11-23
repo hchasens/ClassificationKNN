@@ -35,15 +35,22 @@ To Do
 
 sns.set_theme(style="ticks")
 
-def knn():
-    pass 
-
-
-
 def main():
-    trainRatio = .80
-    d = 2   #dimentions to keep during PCA`
     iris = sns.load_dataset("iris")
+    
+    
+    penguins = sns.load_dataset("penguins")
+    penguins.pop("island")
+    penguins.pop("sex")
+    
+    #print(penguins)
+    
+    (penguinsTestGuess, penguinsAccuracy) = knn(penguins)
+    (irisTestGuess, irisAccuracy) = knn(iris)
+
+
+def knn(data, trainRatio = .80, d = 2, k = 5):
+    #trainRatio = .80 # the ratio at which the data will be split into both training and test sets. 
     """
     1. Visualize the raw data (e.g. in a pair plot), and form a hypothesis about which classifier will perform better: KNN or Naive Bayes.
         I think that KNN will do better. 
@@ -57,7 +64,7 @@ def main():
     I'll normalize by z-score
     Then find the PCA for the training set
     """
-    suffled = iris.sample(frac = 1)  #suffled now contains the shuffled iris dataset
+    suffled = data.sample(frac = 1)  #suffled now contains the shuffled iris dataset
     n = suffled.shape[0]
 
     train = suffled[0:int(trainRatio*n)]         # sets the training set to $TrainingRatio$ of the suffled data 
@@ -74,10 +81,8 @@ def main():
 
 
 
-
-
-
     # PCA starts hear
+    #d = 2   #dimentions to keep during PCA`
     (pc, eig) = Utils.getPC(normTrain)
 
     y = normTrain @ pc
@@ -92,18 +97,6 @@ def main():
     preprosTrain = pd.concat([data_rec, speciesTrain], axis=1) # this is our compleate dataset that has gone through PCA and our preprocessing steps
     #print(preprosTrain)
     sns.pairplot(preprosTrain, hue="species")           # pair plot of our preprocess data
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     # START OF KNN ---- START OF KNN ---- START OF KNN
@@ -135,12 +128,7 @@ def main():
 
 
 
-
-
-
-
-
-    k = 3   #how many neighbors to visit
+    #k = 1   #how many neighbors to visit
 
     #start with a point x
     #find the distance from point x to all the other points in train
@@ -198,13 +186,20 @@ def main():
    
     for x in range(knn.shape[0]):
         p = preTest.iloc[x, :]          # the curent unknown Iris test row
-        vote = []
         nn = knn[x, 1:k+1] # nearest neighbors (we add one to avoid the identity column)
         #print("\n at this point \n", p, " its nearest neighbors are at ", nn) 
         #for now lets just go with the nearest neighbor the implement a voting system
         #print("x is ", x, ". NN is ", nn[0])
         #print("speciesTrain at nn is ", speciesTrain.iloc[nn[0]]) #this works but the line bellow it will delever nan s sometimes
-        assumedSpecies.iloc[x] = speciesTrain.iloc[nn[0]] # I don't know why the line above works but this doens't
+        
+        poll = speciesTrain.iloc[nn[0:k]]
+        #print(poll)
+        vote = poll.value_counts()
+        #print(vote)
+    
+
+        assumedSpecies.iloc[x] = speciesTrain.iloc[nn[0]] # k = 1
+        assumedSpecies.iloc[x] = vote.index[0] # k = k
         
         
         
@@ -214,15 +209,14 @@ def main():
         # yay!! we now have an assumed list of species from our test set. Time to test now acruate it is with the actual set!
 
 
-
-
-
-
     accuracyBool = (assumedSpecies == speciesTest)
     accuracyRaw = accuracyBool.value_counts()
     accuracy = accuracyBool.value_counts(normalize=True).mul(100).astype(str)+'%'
-    print(accuracy)
+  
+    finalTest = pd.concat([test, assumedSpecies], axis=1) # this is our compleate dataset that has gone through PCA and our preprocessing steps
+  
+    return(finalTest, accuracy)
 
 if __name__=="__main__":
     main()
-    plt.show()
+    #plt.show()
